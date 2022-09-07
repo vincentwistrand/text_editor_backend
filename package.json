@@ -1,0 +1,20 @@
+{
+  "name": "editor-backend",
+  "version": "1.0.0",
+  "description": "editor-api",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "production": "NODE_ENV='production' node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "mongodb": "^4.9.1",
+    "morgan": "^1.10.0"
+  }
+}
