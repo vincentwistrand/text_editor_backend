@@ -1,14 +1,14 @@
 const mongo = require("mongodb").MongoClient;
 //const config = require("./config.json");
-const collectionName = "crowd";
+const collectionName = "docs";
 require('dotenv').config()
 
 const database = {
     getDb: async function getDb () {
-        let dsn = `mongodb+srv://myeditor:${process.env.ATLAS_PASSWORD}@cluster0.hvbargr.mongodb.net/docs?retryWrites=true&w=majority`;
+        let dsn = `mongodb+srv://myeditor:${process.env.ATLAS_PASSWORD}@cluster0.hvbargr.mongodb.net/editor?retryWrites=true&w=majority`;
 
         if (process.env.NODE_ENV === 'test') {
-            dsn = `mongodb+srv://myeditor:${process.env.ATLAS_PASSWORD}@cluster0.hvbargr.mongodb.net/test?retryWrites=true&w=majority`;
+            dsn = `mongodb://localhost:27017/test`;
         }
 
         const client  = await mongo.connect(dsn, {
@@ -19,6 +19,7 @@ const database = {
         const collection = await db.collection(collectionName);
 
         return {
+            db: db,
             collection: collection,
             client: client,
         };
