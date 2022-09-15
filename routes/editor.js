@@ -1,4 +1,5 @@
 var express = require('express');
+const { ReturnDocument } = require('mongodb');
 var router = express.Router();
 
 const database = require('../db/database');
@@ -9,30 +10,44 @@ router.get("/docs", (req, res) => {
         const resultSet = await db.collection.find({}).toArray();
         await db.client.close();
 
-        res.json(resultSet);
+        res.json({data: resultSet});
     })();
 });
 
 router.post("/docs", (req, res) => {
-    const newCharacter = {
-        name: req.query.name,
-        content: req.query.content,
-    };
-
-    (async () => {
-        const db = await database.getDb();
-        const result = await db.collection.insertOne(newCharacter);
-        await db.client.close();
-
-        res.status(201).json({msg: result });
-    })();
+    const newDoc = req.query;
+    //console.log(req)
+    if (newDoc.name && newDoc.content) {
+        const docData = {
+            name: req.query.name,
+            content: req.query.content,
+        };
+    
+        (async () => {
+            const db = await database.getDb();
+            const result = await db.collection.insertOne(docData);
+            await db.client.close();
+    
+            res.status(201).json({data: result });
+        })();
+    } else {
+        res.status(400).json({ errors: {
+            message: "'name' and 'content' needed to create new document."
+            }
+        });
+    }
 });
 
 router.put("/docs", (req, res) => {
+    if (!req.query.id) {
+        res.status(400).send("Missing 'id' key")
+        return;
+    }
+
     const ObjectId = require('mongodb').ObjectId;
     const filter = { _id: ObjectId(req.query.id) };
 
-    const updateCharacter = {
+    const updateDoc = {
         $set: {
             name: req.query.name,
             content: req.query.content
@@ -43,12 +58,12 @@ router.put("/docs", (req, res) => {
         const db = await database.getDb();
         const result = await db.collection.updateOne(
             filter,
-            updateCharacter,
+            updateDoc,
             { upsert: true }
         );
 
         await db.client.close();
-        res.json({msg: result });
+        res.status(201).json({data: result });
     })();
 
 });
@@ -56,6 +71,10 @@ router.put("/docs", (req, res) => {
 router.delete("/docs", (req, res) => {
     const ObjectId = require('mongodb').ObjectId;
     const filter = { _id: ObjectId(req.query.id) };
+
+    if (!req.query.id) {
+        res.status(400).send("Missing 'id' key")
+    }
 
     (async () => {
         const db = await database.getDb();
@@ -66,16 +85,6 @@ router.delete("/docs", (req, res) => {
 
         res.status(204).json();
     })();
-});
-
-router.get("/test", (req, res) => {
-    const data = {
-        data: {
-            msg: "test"
-        }
-    };
-
-    res.json(data);
 });
 
 module.exports = router;
