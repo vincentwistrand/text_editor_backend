@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "production": "NODE_ENV='production' node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "nyc --reporter=html --reporter=text --reporter=clover mocha 'test/*.js'"
   },
   "author": "",
   "license": "ISC",
@@ -16,5 +16,11 @@
     "express": "^4.18.1",
     "mongodb": "^4.9.1",
     "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "mocha": "^10.0.0",
+    "nyc": "^15.1.0"
   }
 }
