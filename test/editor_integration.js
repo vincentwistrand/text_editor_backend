@@ -22,12 +22,6 @@ describe('Documents', () => {
                 .then(async function (info) {
                     if (info) {
                         await db.collection.drop();
-
-                        // Create new document
-                        await db.collection.insertOne({
-                            name: "Title",
-                            content: "<p>Content</p>",
-                        });
                     }
                 })
                 .catch(function (err) {
@@ -49,12 +43,7 @@ describe('Documents', () => {
                     res.should.have.status(200);
                     res.body.should.be.an("object");
                     res.body.data.should.be.an("array");
-                    res.body.data.length.should.be.equal(1);
-                    res.body.data[0].should.have.property("_id");
-                    res.body.data[0].should.have.property("name");
-                    res.body.data[0].name.should.equal("Title");
-                    res.body.data[0].should.have.property("content");
-                    res.body.data[0].content.should.equal("<p>Content</p>");
+                    res.body.data.length.should.be.equal(0);
 
                     done();
                 });
@@ -91,12 +80,12 @@ describe('Documents', () => {
                 .get("/docs")
                 .end((err, res) => {
 
-                    res.body.data.length.should.be.equal(2);
-                    res.body.data[1].should.have.property("_id");
-                    res.body.data[1].should.have.property("name");
-                    res.body.data[1].name.should.equal("New title");
-                    res.body.data[1].should.have.property("content");
-                    res.body.data[1].content.should.equal("<p>New content</p>");
+                    res.body.data.length.should.be.equal(1);
+                    res.body.data[0].should.have.property("_id");
+                    res.body.data[0].should.have.property("name");
+                    res.body.data[0].name.should.equal("New title");
+                    res.body.data[0].should.have.property("content");
+                    res.body.data[0].content.should.equal("<p>New content</p>");
 
                     done();
                 });
@@ -130,12 +119,12 @@ describe('Documents', () => {
                 .get("/docs")
                 .end((err, res) => {
 
-                    res.body.data.length.should.be.equal(2);
-                    res.body.data[1].should.have.property("_id");
-                    res.body.data[1].should.have.property("name");
-                    res.body.data[1].name.should.equal("New title");
-                    res.body.data[1].should.have.property("content");
-                    res.body.data[1].content.should.equal("<p>New content</p>");
+                    res.body.data.length.should.be.equal(1);
+                    res.body.data[0].should.have.property("_id");
+                    res.body.data[0].should.have.property("name");
+                    res.body.data[0].name.should.equal("New title");
+                    res.body.data[0].should.have.property("content");
+                    res.body.data[0].content.should.equal("<p>New content</p>");
 
                     done();
                 });
@@ -177,7 +166,7 @@ describe('Documents', () => {
                 .get("/docs")
                 .end((err, res) => {
 
-                    res.body.data.length.should.be.equal(2);
+                    res.body.data.length.should.be.equal(1);
                     res.body.data[0].name.should.be.equal("Updated title");
                     res.body.data[0].content.should.be.equal("<p>Updated content</p>");
 
@@ -191,8 +180,8 @@ describe('Documents', () => {
             (async () => {
            
                 let document = {
-                    name: "Updated title",
-                    content: "<p>Updated content</p>"
+                    name: "New updated title",
+                    content: "<p>New updated content</p>"
                 };
         
                 chai.request(server)
@@ -214,11 +203,9 @@ describe('Documents', () => {
                 .get("/docs")
                 .end((err, res) => {
 
-                    res.body.data.length.should.be.equal(2);
+                    res.body.data.length.should.be.equal(1);
                     res.body.data[0].name.should.be.equal("Updated title");
                     res.body.data[0].content.should.be.equal("<p>Updated content</p>");
-                    res.body.data[1].name.should.equal("New title");
-                    res.body.data[1].content.should.equal("<p>New content</p>");
 
                     done();
                 });
@@ -257,9 +244,7 @@ describe('Documents', () => {
                 .get("/docs")
                 .end((err, res) => {
 
-                    res.body.data.length.should.be.equal(1);
-                    res.body.data[0].name.should.be.equal("New title");
-                    res.body.data[0].content.should.be.equal("<p>New content</p>");
+                    res.body.data.length.should.be.equal(0);
 
                     done();
                 });
