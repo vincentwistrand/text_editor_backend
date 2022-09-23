@@ -53,8 +53,7 @@ describe('Documents', () => {
     describe('POST /docs', () => {
         it('Create new document, status 201', (done) => {
             let document = {
-                name: "New title",
-                content: "<p>New content</p>"
+                name: "New title"
             };
     
             chai.request(server)
@@ -84,8 +83,6 @@ describe('Documents', () => {
                     res.body.data[0].should.have.property("_id");
                     res.body.data[0].should.have.property("name");
                     res.body.data[0].name.should.equal("New title");
-                    res.body.data[0].should.have.property("content");
-                    res.body.data[0].content.should.equal("<p>New content</p>");
 
                     done();
                 });
@@ -123,8 +120,6 @@ describe('Documents', () => {
                     res.body.data[0].should.have.property("_id");
                     res.body.data[0].should.have.property("name");
                     res.body.data[0].name.should.equal("New title");
-                    res.body.data[0].should.have.property("content");
-                    res.body.data[0].content.should.equal("<p>New content</p>");
 
                     done();
                 });
