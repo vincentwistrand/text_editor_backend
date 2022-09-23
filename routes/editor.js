@@ -16,11 +16,11 @@ router.get("/docs", (req, res) => {
 
 router.post("/docs", (req, res) => {
     const newDoc = req.query;
-    //console.log(req)
-    if (newDoc.name && newDoc.content) {
+
+    if (newDoc.name) {
         const docData = {
             name: req.query.name,
-            content: req.query.content,
+            content: "",
         };
     
         (async () => {
