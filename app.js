@@ -11,6 +11,7 @@ const editor = require('./routes/editor');
 app.use(cors());
 app.options('*', cors());
 
+// After cors.
 app.use('/', editor);
 
 app.use(express.json());
@@ -20,6 +21,63 @@ app.use((req, res, next) => {
     console.log(req.path);
     next();
 });
+
+//Socket.io
+const database = require('./db/database');
+const httpServer = require("http").createServer(app);
+
+const io = require("socket.io")(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+let throttleTimer;
+
+io.on('connection', function(socket) {
+    console.log("User with id " + socket.id + " has connected"); // Nått lång och slumpat
+    
+    socket.on('create', function(room) {
+        console.log("New room with id: " + room + " created");
+        socket.join(room);
+    });
+
+
+    socket.on("doc", function (data) {
+        console.log(data);
+        socket.to(data["_id"]).emit("doc", data);
+
+        clearTimeout(throttleTimer);
+        console.log("writing...");
+        throttleTimer = setTimeout(async function() {
+
+            // Update database
+            const ObjectId = require('mongodb').ObjectId;
+            const filter = { _id: ObjectId(data["_id"]) };
+
+            const updateDoc = {
+                $set: {
+                    content: data["html"]
+                }
+            };
+
+            const db = await database.getDb();
+            const result = await db.collection.updateOne(
+                filter,
+                updateDoc,
+                { upsert: true }
+            );
+
+            if (result.acknowledged === true) {
+                console.log("Saved");
+                socket.emit("save", "Sparar...");
+            }
+
+        }, 5000);
+    });
+});
+
 
 
 // don't show the log when it is test
@@ -52,6 +110,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start up server
-const server = app.listen(port, () => console.log(`API listening on port ${port}!`));
+const server = httpServer.listen(port, () => console.log(`API listening on port ${port}!`));
 
 module.exports = server;
