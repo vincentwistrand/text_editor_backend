@@ -9,12 +9,14 @@ const port = process.env.PORT || 1337;
 const editor = require('./routes/editor.js');
 const auth = require('./routes/auth.js');
 
+
 // Must use cors before use routes.
 app.use(cors());
 app.options('*', cors());
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }))
+
 
 // After cors.
 app.use('/', editor);
@@ -25,6 +27,7 @@ app.use((req, res, next) => {
     console.log(req.path);
     next();
 });
+
 
 //Socket.io
 const database = require('./db/database');
@@ -112,6 +115,7 @@ app.use((err, req, res, next) => {
         ]
     });
 });
+
 
 // Start up server
 const server = httpServer.listen(port, () => console.log(`API listening on port ${port}!`));
