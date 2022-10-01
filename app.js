@@ -1,20 +1,24 @@
 const express = require("express");
 const cors = require('cors');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
 
 const app = express();
 const port = process.env.PORT || 1337;
 
-const editor = require('./routes/editor');
+const editor = require('./routes/editor.js');
+const auth = require('./routes/auth.js');
 
 // Must use cors before use routes.
 app.use(cors());
 app.options('*', cors());
 
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }))
+
 // After cors.
 app.use('/', editor);
-
-app.use(express.json());
+app.use('/auth', auth);
 
 app.use((req, res, next) => {
     console.log(req.method);
