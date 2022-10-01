@@ -1,90 +1,84 @@
 var express = require('express');
-const { ReturnDocument } = require('mongodb');
 var router = express.Router();
 
-const database = require('../db/database');
+const docsModel = require('../models/docs');
 
-router.get("/docs", (req, res) => {
-    (async () => {
-        const db = await database.getDb();
-        const resultSet = await db.collection.find({}).toArray();
-        await db.client.close();
 
-        res.json({data: resultSet});
-    })();
-});
-
-router.post("/docs", (req, res) => {
-    const newDoc = req.query;
-
-    if (newDoc.name) {
-        const docData = {
-            name: req.query.name,
-            content: "",
-        };
-    
+router.get("/docs",
+    (req, res, next) => docsModel.checkToken(req, res, next),
+    (req, res) => {
         (async () => {
-            const db = await database.getDb();
-            const result = await db.collection.insertOne(docData);
-            await db.client.close();
-    
-            res.status(201).json({data: result });
+            const resultSet = await docsModel.getDocs()
+
+            res.json({data: resultSet});
         })();
-    } else {
-        res.status(400).json({ errors: {
-            message: "'name' and 'content' needed to create new document."
-            }
-        });
-    }
 });
 
-router.put("/docs", (req, res) => {
-    if (!req.query.id) {
-        res.status(400).send("Missing 'id' key")
-        return;
-    }
 
-    const ObjectId = require('mongodb').ObjectId;
-    const filter = { _id: ObjectId(req.query.id) };
+router.get("/userdocs",
+    (req, res, next) => docsModel.checkToken(req, res, next),
+    (req, res) => {
+        (async () => {
+            const email = req.query.email;
+            const resultSet = await docsModel.getUserDocs(email)
 
-    const updateDoc = {
-        $set: {
-            name: req.query.name,
-            content: req.query.content
+            res.json({data: resultSet});
+        })();
+});
+
+
+router.post("/docs",
+    (req, res, next) => docsModel.checkToken(req, res, next),
+    (req, res) => {
+        const newDoc = req.query;
+        if (newDoc.name) {
+            (async () => {
+                const resultSet = await docsModel.postDocs(newDoc)
+                res.status(201).json({data: resultSet });
+            })();
+        } else {
+            res.status(400).json({ errors: {
+                message: "'name' and 'content' needed to create new document."
+                }
+            });
         }
-    };
+});
 
-    (async () => {
-        const db = await database.getDb();
-        const result = await db.collection.updateOne(
-            filter,
-            updateDoc,
-            { upsert: true }
-        );
 
-        await db.client.close();
-        res.status(201).json({data: result });
-    })();
+router.put("/docs",
+    (req, res, next) => docsModel.checkToken(req, res, next),
+    (req, res) => {
+        const id = req.body.id
+        const name = req.body.name;
+        const content = req.body.content;
+        const access = req.body.access;
+
+        if (!id) {
+            res.status(400).send("Missing 'id' key")
+            return;
+        }
+
+        (async () => {
+            const resultSet = await docsModel.putDocs(id, name, content, access)
+            res.status(201).json({data: resultSet });
+        })();
 
 });
 
-router.delete("/docs", (req, res) => {
-    const ObjectId = require('mongodb').ObjectId;
-    const filter = { _id: ObjectId(req.query.id) };
 
-    if (!req.query.id) {
-        res.status(400).send("Missing 'id' key")
-    }
+router.delete("/docs",
+    (req, res, next) => docsModel.checkToken(req, res, next),
+    (req, res) => {
+        const id = req.query.id;
 
-    (async () => {
-        const db = await database.getDb();
-        await db.collection.deleteOne(
-            filter
-        );
-        await db.client.close();
+        if (!id) {
+            res.status(400).send("Missing 'id' key")
+        }
 
-        res.status(204).json();
-    })();
+        (async () => {
+            await docsModel.deleteDocs(id)
+            res.status(204).json();
+        })();
 });
 
 module.exports = router;
