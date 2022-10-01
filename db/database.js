@@ -1,10 +1,10 @@
 const mongo = require("mongodb").MongoClient;
 //const config = require("./config.json");
-const collectionName = "docs";
+//const collectionName = "docs";
 require('dotenv').config()
 
 const database = {
-    getDb: async function getDb () {
+    getDb: async function getDb (collectionName = "docs") {
         let dsn = `mongodb+srv://myeditor:${process.env.ATLAS_PASSWORD}@cluster0.hvbargr.mongodb.net/editor?retryWrites=true&w=majority`;
 
         if (process.env.NODE_ENV === 'test') {
