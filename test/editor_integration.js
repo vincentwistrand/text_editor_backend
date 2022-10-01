@@ -10,10 +10,16 @@ chai.should();
 
 chai.use(chaiHttp);
 
+const secret = process.env.JWT_SECRET;
+
+const payload = { email: "test@test.com" };
+const jwt = require('jsonwebtoken');
+const token = jwt.sign(payload, secret, { expiresIn: '1h'});
+
 describe('Documents', () => {
     before(() => {
         return new Promise(async (resolve) =>{
-            const db = await database.getDb();
+            const db = await database.getDb(collectionName);
 
             db.db.listCollections(
                 { name: collectionName }
@@ -38,6 +44,7 @@ describe('Documents', () => {
         it('Get all documents, one document should exist, status 200', (done) => {
             chai.request(server)
                 .get("/docs")
+                .set('x-access-token', token)
                 .end((err, res) => {
 
                     res.should.have.status(200);
@@ -58,6 +65,7 @@ describe('Documents', () => {
     
             chai.request(server)
                 .post("/docs")
+                .set('x-access-token', token)
                 .query(document)
                 .end((err, res) => {
 
@@ -77,6 +85,7 @@ describe('Documents', () => {
         it('Check new document', (done) => {
             chai.request(server)
                 .get("/docs")
+                .set('x-access-token', token)
                 .end((err, res) => {
 
                     res.body.data.length.should.be.equal(1);
@@ -97,6 +106,7 @@ describe('Documents', () => {
     
             chai.request(server)
                 .post("/docs")
+                .set('x-access-token', token)
                 .query(document)
                 .end((err, res) => {
 
@@ -114,6 +124,7 @@ describe('Documents', () => {
         it('Check that new document was not created', (done) => {
             chai.request(server)
                 .get("/docs")
+                .set('x-access-token', token)
                 .end((err, res) => {
 
                     res.body.data.length.should.be.equal(1);
@@ -137,15 +148,20 @@ describe('Documents', () => {
                 
                 let document = {
                     id: docId,
+                    user: "test@test.com",
                     name: "Updated title",
-                    content: "<p>Updated content</p>"
+                    content: "<p>Updated content</p>",
+                    access: []
                 };
         
                 chai.request(server)
                     .put("/docs")
-                    .query(document)
+                    .set({
+                        "content-type": "application/json",
+                        "x-access-token": token,
+                    })
+                    .send(JSON.stringify(document))
                     .end((err, res) => {
-
                         res.body.data.should.have.property("acknowledged");
                         res.body.data.acknowledged.should.equal(true);
 
@@ -159,6 +175,7 @@ describe('Documents', () => {
         it('Check if document is updated', (done) => {
             chai.request(server)
                 .get("/docs")
+                .set('x-access-token', token)
                 .end((err, res) => {
 
                     res.body.data.length.should.be.equal(1);
@@ -181,7 +198,11 @@ describe('Documents', () => {
         
                 chai.request(server)
                     .put("/docs")
-                    .query(document)
+                    .set({
+                        "content-type": "application/json",
+                        "x-access-token": token,
+                    })
+                    .send(JSON.stringify(document))
                     .end((err, res) => {
 
                         res.should.have.status(400);
@@ -196,6 +217,7 @@ describe('Documents', () => {
         it('Check that nothing was updated or created', (done) => {
             chai.request(server)
                 .get("/docs")
+                .set('x-access-token', token)
                 .end((err, res) => {
 
                     res.body.data.length.should.be.equal(1);
@@ -222,6 +244,7 @@ describe('Documents', () => {
         
                 chai.request(server)
                     .delete("/docs")
+                    .set('x-access-token', token)
                     .query(document)
                     .end((err, res) => {
 
@@ -237,6 +260,7 @@ describe('Documents', () => {
         it('Check that document was deleted', (done) => {
             chai.request(server)
                 .get("/docs")
+                .set('x-access-token', token)
                 .end((err, res) => {
 
                     res.body.data.length.should.be.equal(0);
@@ -252,6 +276,7 @@ describe('Documents', () => {
 
                 chai.request(server)
                     .delete("/docs")
+                    .set('x-access-token', token)
                     .query({})
                     .end((err, res) => {
 
@@ -262,28 +287,4 @@ describe('Documents', () => {
             })();
         });
     });
-
-    describe('POST /docs', () => {
-        it('Status 500', (done) => {
-            (async () => {
-                
-                let document = {
-                    id: "43256",
-                    name: "Updated title",
-                    content: "<p>Updated content</p>"
-                };
-        
-                chai.request(server)
-                    .put("/docs")
-                    .query(document)
-                    .end((err, res) => {
-
-                        res.should.have.status(500);
-
-                        done();
-                    });
-            })();
-        });
-    });
-
 });
