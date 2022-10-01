@@ -10,7 +10,7 @@ chai.should();
 
 chai.use(chaiHttp);
 
-const secret = "bfyisgbsfibvfgjsfv";
+const secret = process.env.JWT_SECRET;
 
 const payload = { email: "test@test.com" };
 const jwt = require('jsonwebtoken');
