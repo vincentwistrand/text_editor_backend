@@ -24,6 +24,8 @@ jobs:
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
+      env:
+        JWT_SECRET: "bjvfoisguherwuhbgveiwrgnbrebvfgvwuinwvwiryfiewbuv"
       with:
         node-version: ${{ matrix.node-version }}
 
