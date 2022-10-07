@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const { graphqlHTTP } = require('express-graphql');
 
 const app = express();
 const port = process.env.PORT || 1337;
@@ -9,14 +10,14 @@ const port = process.env.PORT || 1337;
 const editor = require('./routes/editor.js');
 const auth = require('./routes/auth.js');
 
-
-// Must use cors before use routes.
-app.use(cors());
-app.options('*', cors());
+const docsModel = require('./models/docs');
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }))
 
+// Must use cors before use routes.
+app.use(cors());
+app.options('*', cors());
 
 // After cors.
 app.use('/', editor);
@@ -27,6 +28,27 @@ app.use((req, res, next) => {
     console.log(req.path);
     next();
 });
+
+
+
+//GraphQL
+const RootQueryType = require("./graphql/root.js");
+
+const {
+    GraphQLSchema
+} = require('graphql');
+
+const schema = new GraphQLSchema({
+    query: RootQueryType
+})
+
+app.use('/graphql',
+    //(req, res, next) => docsModel.checkToken(req, res, next),
+    graphqlHTTP({
+        schema: schema,
+        graphiql: true
+    }))
+
 
 
 //Socket.io
@@ -49,7 +71,6 @@ io.on('connection', function(socket) {
         console.log("New room with id: " + room + " created");
         socket.join(room);
     });
-
 
     socket.on("doc", function (data) {
         console.log(data);
@@ -100,6 +121,8 @@ app.use((req, res, next) => {
     next(err);
 });
 
+
+//Error
 app.use((err, req, res, next) => {
     if (res.headersSent) {
         return next(err);
