@@ -9,6 +9,7 @@ const port = process.env.PORT || 1337;
 
 const editor = require('./routes/editor.js');
 const auth = require('./routes/auth.js');
+const invite = require('./routes/invite.js');
 
 const docsModel = require('./models/docs');
 
@@ -22,6 +23,7 @@ app.options('*', cors());
 // After cors.
 app.use('/', editor);
 app.use('/auth', auth);
+app.use('/invite', invite);
 
 app.use((req, res, next) => {
     console.log(req.method);
@@ -65,7 +67,7 @@ const io = require("socket.io")(httpServer, {
 let throttleTimer;
 
 io.on('connection', function(socket) {
-    console.log("User with id " + socket.id + " has connected"); // Nått lång och slumpat
+    console.log("User with id " + socket.id + " has connected");
     
     socket.on('create', function(room) {
         console.log("New room with id: " + room + " created");
@@ -96,6 +98,7 @@ io.on('connection', function(socket) {
                 updateDoc,
                 { upsert: true }
             );
+            await db.client.close();
 
             if (result.acknowledged === true) {
                 console.log("Saved");
