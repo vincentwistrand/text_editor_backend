@@ -1,3 +1,4 @@
+/*eslint-disable */
 process.env.NODE_ENV = 'test';
 
 const chai = require('chai');
@@ -41,7 +42,7 @@ describe('Documents', () => {
     });
 
     describe('GET /docs', () => {
-        it('Get all documents, one document should exist, status 200', (done) => {
+        it('Get all documents, none should exist, status 200', (done) => {
             chai.request(server)
                 .get("/docs")
                 .set('x-access-token', token)
