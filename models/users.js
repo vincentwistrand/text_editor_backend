@@ -1,24 +1,20 @@
 const database = require('../db/database');
-
 const validator = require("email-validator");
-
 const bcrypt = require('bcryptjs');
 const saltRounds = 10;
-
 const jwt = require('jsonwebtoken');
-
-const ObjectId = require('mongodb').ObjectId;
 
 const usersModel = {
     getAllUsers: async function getAllUsers() {
         let db = await database.getDb("users");
         const users = await db.collection.find({}).toArray();
+
         await db.client.close();
 
         return users;
     },
 
-    register: async function register(res,body) {
+    register: async function register(res, body) {
         const email = body.email;
         const password = body.password;
         const admin = body.admin;
@@ -36,7 +32,7 @@ const usersModel = {
                     status: 400,
                     message: "User already exists.",
                 }
-            })
+            });
         }
 
         if (!email || !password) {
@@ -45,7 +41,7 @@ const usersModel = {
                     status: 400,
                     message: "Email or password is missing",
                 }
-            })
+            });
         }
 
         if (!validator.validate(email)) {
@@ -54,7 +50,7 @@ const usersModel = {
                     status: 400,
                     message: "Email has wrong format",
                 }
-            })
+            });
         }
 
         bcrypt.hash(password, saltRounds, async function(err, hash) {
@@ -64,7 +60,7 @@ const usersModel = {
                         status: 400,
                         message: "Could not hash password",
                     }
-                })
+                });
             }
 
             try {
@@ -80,23 +76,21 @@ const usersModel = {
                     data: {
                         message: "User successfully created."
                     }
-                })
-
+                });
             } catch (error) {
                 return res.status(500).json({
                     errors: {
                         status: 500,
                         message: "Could not create new user"
                     }
-                })
+                });
             } finally {
                 await db.client.close();
             }
         });
     },
 
-
-    login: async function login(res,body) {
+    login: async function login(res, body) {
         const email = body.email;
         const password = body.password;
 
@@ -106,7 +100,7 @@ const usersModel = {
                     status: 400,
                     message: "Email or password is missing",
                 }
-            })
+            });
         }
 
         let db = await database.getDb("users");
@@ -126,9 +120,8 @@ const usersModel = {
                         status: 400,
                         message: "User do not exist",
                     }
-                })
+                });
             }
-
         } finally {
             await db.client.close();
         }
@@ -144,7 +137,7 @@ const usersModel = {
                         status: 500,
                         message: "Decryption error."
                     }
-                })
+                });
             }
 
             if (result === false) {
@@ -153,7 +146,7 @@ const usersModel = {
                         status: 400,
                         message: "Wrong password."
                     }
-                })
+                });
             }
 
             if (result) {
@@ -168,7 +161,7 @@ const usersModel = {
                         email: user.email,
                         token: token
                     }
-                })
+                });
             }
         });
     },
