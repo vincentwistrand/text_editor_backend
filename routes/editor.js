@@ -6,79 +6,75 @@ const docsModel = require('../models/docs');
 
 router.get("/docs",
     (req, res, next) => docsModel.checkToken(req, res, next),
-    (req, res) => {
-        (async () => {
-            const resultSet = await docsModel.getDocs()
+    async (req, res) => {
+        const resultSet = await docsModel.getDocs();
 
-            res.json({data: resultSet});
-        })();
-});
+        res.json({data: resultSet});
+    }
+);
 
 
 router.get("/userdocs",
     (req, res, next) => docsModel.checkToken(req, res, next),
-    (req, res) => {
-        (async () => {
-            const email = req.query.email;
-            const resultSet = await docsModel.getUserDocs(email)
+    async (req, res) => {
+        const email = req.query.email;
+        const resultSet = await docsModel.getUserDocs(email);
 
-            res.json({data: resultSet});
-        })();
-});
+        res.json({data: resultSet});
+    }
+);
 
 
 router.post("/docs",
     (req, res, next) => docsModel.checkToken(req, res, next),
-    (req, res) => {
+    async (req, res) => {
         const newDoc = req.query;
+
         if (newDoc.name) {
-            (async () => {
-                const resultSet = await docsModel.postDocs(newDoc)
-                res.status(201).json({data: resultSet });
-            })();
+            const resultSet = await docsModel.postDocs(newDoc);
+
+            res.status(201).json({data: resultSet });
         } else {
             res.status(400).json({ errors: {
                 message: "'name' and 'content' needed to create new document."
-                }
-            });
+            }});
         }
-});
+    }
+);
 
 
 router.put("/docs",
     (req, res, next) => docsModel.checkToken(req, res, next),
-    (req, res) => {
-        const id = req.body.id
+    async (req, res) => {
+        const id = req.body.id;
         const name = req.body.name;
         const content = req.body.content;
         const access = req.body.access;
 
         if (!id) {
-            res.status(400).send("Missing 'id' key")
+            res.status(400).send("Missing 'id' key");
             return;
         }
 
-        (async () => {
-            const resultSet = await docsModel.putDocs(id, name, content, access)
-            res.status(201).json({data: resultSet });
-        })();
+        const resultSet = await docsModel.putDocs(id, name, content, access);
 
-});
+        res.status(201).json({data: resultSet });
+    }
+);
 
 
 router.delete("/docs",
     (req, res, next) => docsModel.checkToken(req, res, next),
-    (req, res) => {
+    async (req, res) => {
         const id = req.query.id;
 
         if (!id) {
-            res.status(400).send("Missing 'id' key")
+            res.status(400).send("Missing 'id' key");
         }
 
-        (async () => {
-            await docsModel.deleteDocs(id)
-            res.status(204).json();
-        })();
-});
+        await docsModel.deleteDocs(id);
+        res.status(204).json();
+    }
+);
 
 module.exports = router;
