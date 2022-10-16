@@ -32,6 +32,7 @@ const docsModel = {
             user: newDoc.user,
             name: newDoc.name,
             content: "",
+            type: newDoc.type,
             access: new Array()
         };
 
