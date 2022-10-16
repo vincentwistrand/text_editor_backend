@@ -13,32 +13,9 @@ const usersModel = {
     getAllUsers: async function getAllUsers() {
         let db = await database.getDb("users");
         const users = await db.collection.find({}).toArray();
+        await db.client.close();
 
         return users;
-    },
-
-    deleteUser: async function deleteUser(id, res) {
-        const filter = { _id: ObjectId(id) };
-        const db = await database.getDb("users");
-
-        try {
-            await db.collection.deleteOne(
-                filter
-            );
-            res.status(201).json({
-                data: {
-                    message: "User successfully deleted."
-                }
-            })
-        } catch (error) {
-            res.status(400).json({
-                data: {
-                    message: "Could not remove user."
-                }
-            })
-        } finally {
-            await db.client.close();
-        }
     },
 
     register: async function register(res,body) {
@@ -91,13 +68,13 @@ const usersModel = {
             }
 
             try {
-                const doc = {
+                const user = {
                     email: email,
                     password: hash,
                     admin: admin
                 };
 
-                await db.collection.insertOne(doc);
+                await db.collection.insertOne(user);
 
                 return res.status(201).json({
                     data: {
@@ -171,9 +148,9 @@ const usersModel = {
             }
 
             if (result === false) {
-                return res.status(500).json({
+                return res.status(400).json({
                     errors: {
-                        status: 500,
+                        status: 400,
                         message: "Wrong password."
                     }
                 })
