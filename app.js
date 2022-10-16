@@ -11,10 +11,8 @@ const editor = require('./routes/editor.js');
 const auth = require('./routes/auth.js');
 const invite = require('./routes/invite.js');
 
-const docsModel = require('./models/docs');
-
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // Must use cors before use routes.
 app.use(cors());
@@ -42,14 +40,14 @@ const {
 
 const schema = new GraphQLSchema({
     query: RootQueryType
-})
+});
 
 app.use('/graphql',
     //(req, res, next) => docsModel.checkToken(req, res, next),
     graphqlHTTP({
         schema: schema,
         graphiql: true
-    }))
+    }));
 
 
 
@@ -58,17 +56,17 @@ const database = require('./db/database');
 const httpServer = require("http").createServer(app);
 
 const io = require("socket.io")(httpServer, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
 });
 
 let throttleTimer;
 
 io.on('connection', function(socket) {
     console.log("User with id " + socket.id + " has connected");
-    
+
     socket.on('create', function(room) {
         console.log("New room with id: " + room + " created");
         socket.join(room);
@@ -81,7 +79,6 @@ io.on('connection', function(socket) {
         clearTimeout(throttleTimer);
         console.log("writing...");
         throttleTimer = setTimeout(async function() {
-
             // Update database
             const ObjectId = require('mongodb').ObjectId;
             const filter = { _id: ObjectId(data["_id"]) };
@@ -93,18 +90,19 @@ io.on('connection', function(socket) {
             };
 
             const db = await database.getDb();
+
             const result = await db.collection.updateOne(
                 filter,
                 updateDoc,
                 { upsert: true }
             );
+
             await db.client.close();
 
             if (result.acknowledged === true) {
                 console.log("Saved");
                 socket.emit("save", "Sparar...");
             }
-
         }, 5000);
     });
 });
@@ -120,6 +118,7 @@ if (process.env.NODE_ENV !== 'test') {
 // Put last.
 app.use((req, res, next) => {
     var err = new Error("Not Found");
+
     err.status = 404;
     next(err);
 });
