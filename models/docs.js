@@ -8,8 +8,9 @@ const docsModel = {
     getDocs: async function getDocs() {
         const db = await database.getDb();
         const resultSet = await db.collection.find({}).toArray();
+
         await db.client.close();
-            
+
         return resultSet;
     },
 
@@ -22,8 +23,9 @@ const docsModel = {
 
         const db = await database.getDb();
         const resultSet = await db.collection.find(user).toArray();
+
         await db.client.close();
-            
+
         return resultSet;
     },
 
@@ -38,8 +40,9 @@ const docsModel = {
 
         const db = await database.getDb();
         const resultSet = await db.collection.insertOne(docData);
+
         await db.client.close();
-    
+
         return resultSet;
     },
 
@@ -60,15 +63,16 @@ const docsModel = {
             updateDoc,
             { upsert: true }
         );
+
         await db.client.close();
-    
+
         return resultSet;
     },
-    
+
     deleteDocs: async function deleteDocs(id) {
         const filter = { _id: ObjectId(id) };
-
         const db = await database.getDb();
+
         await db.collection.deleteOne(
             filter
         );
@@ -79,17 +83,17 @@ const docsModel = {
 
     checkToken: async function checkToken(req, res, next) {
         const token = req.headers['x-access-token'];
-    
-        jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+
+        jwt.verify(token, process.env.JWT_SECRET, function(err) {
             if (err) {
                 return res.status(401).json({
                     errors: {
                         status: 401,
                         message: "Token has expired"
                     }
-                })
+                });
             }
-    
+
             // Valid token send on the request
             next();
         });
